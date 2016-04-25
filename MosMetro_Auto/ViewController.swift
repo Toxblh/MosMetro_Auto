@@ -21,12 +21,6 @@ class ViewController: UIViewController {
 
     // Button
     @IBAction func GetSSID(sender: AnyObject) {
-        let alertController = UIAlertController(title: "MosMetro_Auto", message:
-            "Get SSID", preferredStyle: UIAlertControllerStyle.Alert)
-        alertController.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default,handler: nil))
-
-        self.presentViewController(alertController, animated: true, completion: nil)
-
         let NameWifi = fetchSSIDInfo()
         WifiName.text = NameWifi
     }
@@ -88,6 +82,13 @@ class ViewController: UIViewController {
     func DebugLog(newLine: NSString) {
         let text = "\n\(newLine as String)"
         DebugText.text = DebugText.text.stringByAppendingString(text)
+    }
+    
+    func viewAlert(title: String, message: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.Alert)
+        alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default,handler: nil))
+        
+        self.presentViewController(alertController, animated: true, completion: nil)
     }
 
     func connectInternet() {
