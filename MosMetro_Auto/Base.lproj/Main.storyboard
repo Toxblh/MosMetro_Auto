@@ -62,10 +62,10 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jrD-co-ucf">
-                                <rect key="frame" x="116" y="518" width="89" height="30"/>
-                                <state key="normal" title="TryConnenct"/>
+                                <rect key="frame" x="139" y="518" width="44" height="30"/>
+                                <state key="normal" title="Check"/>
                                 <connections>
-                                    <action selector="TryConnect:" destination="BYZ-38-t0r" eventType="touchUpInside" id="9Ja-dw-5en"/>
+                                    <action selector="Check:" destination="BYZ-38-t0r" eventType="touchUpInside" id="JZB-rX-lSg"/>
                                 </connections>
                             </button>
                         </subviews>
