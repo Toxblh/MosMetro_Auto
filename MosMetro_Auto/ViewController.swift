@@ -12,6 +12,7 @@ class ViewController: UIViewController {
 
     let SSID_Metro = "MosMetro_Free"
     let loginURL = "http://wi-fi.ru"
+    let MMA = MosMetroAPI()
 
     //Text
     @IBOutlet weak var WifiName: UILabel!
@@ -21,11 +22,11 @@ class ViewController: UIViewController {
 
     // Button
     @IBAction func GetSSID(sender: AnyObject) {
-//        let NameWifi = getSSID()
-//        WifiName.text = NameWifi
-//        if (NameWifi ==  SSID_Metro) {
-//            DebugLog("Вы в метро!")
-//        }
+        let NameWifi = MMA.getSSID()
+        WifiName.text = NameWifi
+        if (NameWifi ==  SSID_Metro) {
+            DebugLog("Вы в метро!")
+        }
 
     }
 
@@ -43,12 +44,15 @@ class ViewController: UIViewController {
         }
     }
 
-
     func DebugLog(newLine: AnyObject) {
         print(newLine)
         let text = "\n\(String(newLine))"
         dispatch_async(dispatch_get_main_queue(), {
             self.DebugText.text = self.DebugText.text.stringByAppendingString(text)
+            if (self.DebugText.text.characters.count > 0) {
+                let range = NSMakeRange(self.DebugText.text.characters.count-1, 1);
+                self.DebugText.scrollRangeToVisible(range);
+            }
         })
     }
 
@@ -93,7 +97,6 @@ class ViewController: UIViewController {
     }
     
     func matchesForRegexInText(regex: String!, text: String!) -> [String] {
-        
         do {
             let regex = try NSRegularExpression(pattern: regex, options: [])
             let nsString = text as NSString
@@ -239,47 +242,7 @@ class ViewController: UIViewController {
 
         task.resume()
     }
-
-
-//    func getSSID() ->  String {
-//        var currentSSID = ""
-//        if let interfaces:CFArray! = CNCopySupportedInterfaces() {
-//            for i in 0..<CFArrayGetCount(interfaces){
-//                let interfaceName: UnsafePointer<Void> = CFArrayGetValueAtIndex(interfaces, i)
-//                let rec = unsafeBitCast(interfaceName, AnyObject.self)
-//                let unsafeInterfaceData = CNCopyCurrentNetworkInfo("\(rec)")
-//                if unsafeInterfaceData != nil {
-//                    let interfaceData = unsafeInterfaceData! as Dictionary!
-//                    currentSSID = interfaceData["SSID"] as! String
-//                }
-//            }
-//        }
-//        return currentSSID
-//        if let list = cmd.networkList where cmd.commandType == .FilterScanList {
-//            var networks = [NEHotspotNetwork]()
-//            for network in list {
-//                if network.SSID.hasPrefix("BTVNET") {
-//                    network.setPassword("12345678")
-//                    network.setConfidence(.High)
-//                    networks.append(network)
-//                }
-//            }
-//            let response = cmd.createResponse(.Success)
-//            response.setNetworkList(networks)  
-//            response.deliver()  
-//        }
-//        
-//        
-//        hotspotNetwork = NEHotspotHelper supportedNetworkInterfaces
-//            NSString ssid = hotspotNetwork.SSID;
-//            NSString bssid = hotspotNetwork.BSSID;
-//            BOOL secure = hotspotNetwork.secure;
-//            BOOL autoJoined = hotspotNetwork.autoJoined;
-//            double signalStrength = hotspotNetwork.signalStrength;
-//
-//        return ""
-//    }
-
+    
     func checkInternet() -> Bool {
 
         let testURL = "https://www.ya.ru"
@@ -307,17 +270,33 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if (checkInternet()) {
-            InternetState.text = "Есть"
-        } else {
-            InternetState.text = "Нет"
+        let NameWifi = MMA.getSSID()
+        WifiName.text = NameWifi
+        if (NameWifi ==  SSID_Metro) {
+            DebugLog("> Вы в метро!")
+            DebugLog("> Проверка интернета...")
+            if (checkInternet()) {
+                InternetState.text = "Есть"
+                DebugLog("> Есть")
+            } else {
+                InternetState.text = "Нет"
+                DebugLog("> Нет")
+                DebugLog("> Произвожу подключение")
+                connectInternet()
+            }
         }
         
-//        let NameWifi = getSSID()
-//        WifiName.text = NameWifi
-//        if (NameWifi ==  SSID_Metro) {
-//            DebugLog("Вы в метро!")
-//        }
+        //Режим проверки без WiFi
+        DebugLog("> Проверка интернета...")
+        if (checkInternet()) {
+            InternetState.text = "Есть"
+            DebugLog("> Есть")
+        } else {
+            InternetState.text = "Нет"
+            DebugLog("> Нет")
+            DebugLog("> Произвожу подключение")
+            connectInternet()
+        }
 
     }
 

@@ -24,13 +24,13 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" text="Debug Monitor" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="dDF-Zo-6cc">
-                                <rect key="frame" x="20" y="86" width="280" height="416"/>
+                                <rect key="frame" x="20" y="91" width="280" height="411"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="self-&gt;WiFi Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yEN-Pb-kpV">
-                                <rect key="frame" x="70" y="28" width="230" height="21"/>
+                                <rect key="frame" x="70" y="28" width="169" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -42,27 +42,33 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sdB-tV-xzy">
-                                <rect key="frame" x="20" y="518" width="70" height="30"/>
+                                <rect key="frame" x="247" y="20" width="73" height="30"/>
+                                <color key="backgroundColor" red="0.94114037958115182" green="0.90453834991444682" blue="0.2423217958111451" alpha="1" colorSpace="calibratedRGB"/>
                                 <state key="normal" title="GetSSID"/>
                                 <connections>
                                     <action selector="GetSSID:" destination="BYZ-38-t0r" eventType="touchUpInside" id="v4Q-0i-UzD"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UXB-b2-NFd">
-                                <rect key="frame" x="233" y="518" width="67" height="30"/>
-                                <state key="normal" title="Connenct"/>
+                                <rect key="frame" x="0.0" y="518" width="320" height="50"/>
+                                <color key="backgroundColor" red="0.57882035340314131" green="0.57882035340314131" blue="0.57882035340314131" alpha="1" colorSpace="calibratedRGB"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                <state key="normal" title="Connenct">
+                                    <color key="titleColor" red="0.80611910994764402" green="0.0" blue="0.016552008788192372" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
                                 <connections>
                                     <action selector="Connect:" destination="BYZ-38-t0r" eventType="touchUpInside" id="qef-bP-1ZP"/>
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="True/False" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jIN-aN-274">
-                                <rect key="frame" x="97" y="57" width="203" height="21"/>
+                                <rect key="frame" x="97" y="57" width="142" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jrD-co-ucf">
-                                <rect key="frame" x="139" y="518" width="44" height="30"/>
+                                <rect key="frame" x="247" y="53" width="73" height="30"/>
+                                <color key="backgroundColor" red="0.78357711418040243" green="0.91475785340314131" blue="0.79182804780626637" alpha="1" colorSpace="calibratedRGB"/>
                                 <state key="normal" title="Check"/>
                                 <connections>
                                     <action selector="Check:" destination="BYZ-38-t0r" eventType="touchUpInside" id="JZB-rX-lSg"/>
