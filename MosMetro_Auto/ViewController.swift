@@ -12,6 +12,7 @@ class ViewController: UIViewController {
 
     let SSID_Metro = "MosMetro_Free"
     let loginURL = "http://wi-fi.ru"
+    let testURL = "http://toxblh.github.io/inet.html"
     let MMA = MosMetroAPI()
 
     //Text
@@ -24,6 +25,7 @@ class ViewController: UIViewController {
     @IBAction func GetSSID(sender: AnyObject) {
         let NameWifi = MMA.getSSID()
         WifiName.text = NameWifi
+        DebugLog("# wifi: " + NameWifi)
         if (NameWifi ==  SSID_Metro) {
             DebugLog("Вы в метро!")
         }
@@ -33,21 +35,24 @@ class ViewController: UIViewController {
     @IBAction func Connect(sender: UIButton) {
         DebugLog("Connect to Internet")
         setNotification("Успешное подключение к интернету", action: "Какой-то экшон", time: 10)
+        DebugLog("# Начало подключения к интернету:")
         connectInternet()
     }
 
     @IBAction func Check(sender: UIButton) {
         if (checkInternet()) {
             InternetState.text = "Есть"
+            DebugLog("# Подключение к интрнету: Есть")
         } else {
             InternetState.text = "Нет"
+            DebugLog("# Подключение к интрнету: Нет")
         }
     }
 
     func DebugLog(newLine: AnyObject) {
         print(newLine)
         let text = "\n\(String(newLine))"
-        dispatch_async(dispatch_get_main_queue(), {
+        dispatch_async(dispatch_get_main_queue(), { () -> Void in
             self.DebugText.text = self.DebugText.text.stringByAppendingString(text)
             if (self.DebugText.text.characters.count > 0) {
                 let range = NSMakeRange(self.DebugText.text.characters.count-1, 1);
@@ -81,21 +86,10 @@ class ViewController: UIViewController {
                 }
             }
         }
-        
+
         task.resume()
     }
-    
-    func DLog(html: NSString?, head: NSObject?, code: Int?, error: String?) {
-        if error == nil {
-            DebugLog(code!);
-            DebugLog(head!);
-            DebugLog(html!);
-        } else {
-            DebugLog(error!);
-        }
-        
-    }
-    
+
     func matchesForRegexInText(regex: String!, text: String!) -> [String] {
         do {
             let regex = try NSRegularExpression(pattern: regex, options: [])
@@ -111,15 +105,14 @@ class ViewController: UIViewController {
 
     func connectInternet() -> Bool {
         var RedirectURL = ""
-        print("Connect")
 
-        //DebugLog("> Подключение к сети " + getSSID());
+        DebugLog("> Подключение к сети " + MMA.getSSID());
         DebugLog(">> Проверка доступа в интернет");
         let connected = checkInternet();
-        
+
         if (connected) {
             DebugLog("<< Уже есть");
-            //return true; //Раз есть то смысла нет
+            return true; //Раз есть то смысла нет
         } else  {
             DebugLog("<< Интернета нет");
         }
@@ -131,76 +124,77 @@ class ViewController: UIViewController {
             let contents = try NSString(contentsOfURL: url, usedEncoding: nil)
             if (contents != "") {
                 DebugLog(contents)
-                
+
                 let findRedirect = matchesForRegexInText("URL=([?=&\\da-z\\.-:\\.\\/\\w \\.-]*)", text: contents as String)
                 DebugLog(findRedirect)
-                
-                    let rawUrlRedirect = String(findRedirect)
-                    if rawUrlRedirect != "[]" {
-                        let rangeURL = Range(rawUrlRedirect.startIndex.advancedBy(6)..<rawUrlRedirect.endIndex.advancedBy(-2))
-                        RedirectURL = rawUrlRedirect[rangeURL]
-                        DebugLog(RedirectURL)
-                    } else {
-                        DebugLog("<<< Ошибка: перенаправление не найдено")
-                        DebugLog("^<<Нет ссылки")
-                        return false
+
+                let rawUrlRedirect = String(findRedirect)
+                if rawUrlRedirect != "[]" {
+                    let rangeURL = Range(rawUrlRedirect.startIndex.advancedBy(6)..<rawUrlRedirect.endIndex.advancedBy(-2))
+                    RedirectURL = rawUrlRedirect[rangeURL]
+                    DebugLog(RedirectURL)
+
+                } else {
+                    DebugLog("<<< Ошибка: перенаправление не найдено")
+                    DebugLog("<<< Нет ссылки")
+                    return false
                 }
+
             } else {
                 DebugLog("<<< Ошибка: перенаправление не найдено")
-                DebugLog("^<<Нет контента")
-                //return false
+                DebugLog("<<< Нет контента")
+                return false
                 }
             } catch {
                 DebugLog("[Error:1] Эксепшон!!")
-                //return false
+                return false
             }
         }
-        
+
 
         DebugLog(">>> Получение страницы авторизации");
-        
+
         let tutorialsURL = NSURL(string: RedirectURL)
         let htmlData: NSData = NSData(contentsOfURL: tutorialsURL!)!
         let input = NSString(data: htmlData, encoding: NSUTF8StringEncoding)
         DebugLog(input!)
-        
+
         let findCsrfSign = matchesForRegexInText("<input type=\"hidden\" name=\"csrf\\.sign\" value=\"[0-9a-z]*\"\\/>", text: input as! String)
         let rawCsrfSign = String(findCsrfSign)
         let rangeCsrfSign = rawCsrfSign.startIndex.advancedBy(52)..<rawCsrfSign.endIndex.advancedBy(-6)
         let csrfSign = rawCsrfSign[rangeCsrfSign]
         DebugLog(csrfSign)
-        
+
         let findCsrfTs = matchesForRegexInText("<input type=\"hidden\" name=\"csrf\\.ts\" value=\"[0-9a-z]*\"\\/>", text: input as! String)
         let rawCsrfTs = String(findCsrfTs)
         let rangeCsrfTs = rawCsrfTs.startIndex.advancedBy(50)..<rawCsrfTs.endIndex.advancedBy(-6)
         let csrfTs = rawCsrfTs[rangeCsrfTs]
         DebugLog(csrfTs)
-        
-        
+
         DebugLog(">>> Отправка формы авторизации");
-        
+
         let url:NSURL = NSURL(string: RedirectURL)!
         let session = NSURLSession.sharedSession()
-        
+
         let request = NSMutableURLRequest(URL: url)
         request.HTTPMethod = "POST"
         request.cachePolicy = NSURLRequestCachePolicy.ReloadIgnoringCacheData
-        
+
         let paramString = "promogoto=&IDButton=Confirm&csrf.sign="+csrfSign+"&csrf.ts="+csrfTs
         request.HTTPBody = paramString.dataUsingEncoding(NSUTF8StringEncoding)
         DebugLog(request)
         let task = session.dataTaskWithRequest(request) {
             (
             let data, let response, let error) in
-            
+
             guard let _:NSData = data, let _:NSURLResponse = response  where error == nil else {
                 self.DebugLog("<<< Ошибка: сервер не ответил или вернул ошибку");
                 return
             }
-            
+
             let dataString = NSString(data: data!, encoding: NSUTF8StringEncoding)
             self.DebugLog(dataString!)
-            
+
             self.DebugLog(">> Проверка доступа в интернет");
             if (self.checkInternet()) {
                 self.DebugLog("<< Соединение успешно установлено :3");
@@ -208,45 +202,13 @@ class ViewController: UIViewController {
                 self.DebugLog("<< Ошибка: доступ в интернет отсутствует");
             }
         }
-        
+
         task.resume()
-        
+
         return false;
     }
 
-    func data_request()
-    {
-        let url:NSURL = NSURL(string: "https://ya.ru")!
-        let session = NSURLSession.sharedSession()
-
-        let request = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.cachePolicy = NSURLRequestCachePolicy.ReloadIgnoringCacheData
-
-        let paramString = "data=Hello"
-        request.HTTPBody = paramString.dataUsingEncoding(NSUTF8StringEncoding)
-
-        let task = session.dataTaskWithRequest(request) {
-            (
-            let data, let response, let error) in
-
-            guard let _:NSData = data, let _:NSURLResponse = response  where error == nil else {
-                print("error")
-                return
-            }
-
-            let dataString = NSString(data: data!, encoding: NSUTF8StringEncoding)
-            print(dataString)
-
-        }
-
-        task.resume()
-    }
-    
     func checkInternet() -> Bool {
-
-        let testURL = "https://www.ya.ru"
-
         if let url = NSURL(string: testURL) {
             do {
                 let contents = try NSString(contentsOfURL: url, usedEncoding: nil)
@@ -257,19 +219,16 @@ class ViewController: UIViewController {
                     return false
                 }
             } catch {
-
+                return false
             }
         } else {
-
+            return false
         }
-
-        return false
     }
-
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         let NameWifi = MMA.getSSID()
         WifiName.text = NameWifi
         if (NameWifi ==  SSID_Metro) {
@@ -285,7 +244,7 @@ class ViewController: UIViewController {
                 connectInternet()
             }
         }
-        
+
         //Режим проверки без WiFi
         DebugLog("> Проверка интернета...")
         if (checkInternet()) {
