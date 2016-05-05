@@ -23,7 +23,7 @@
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" text="Debug Monitor" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="dDF-Zo-6cc">
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" editable="NO" text="Debug Monitor" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dDF-Zo-6cc">
                                 <rect key="frame" x="20" y="91" width="280" height="411"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>

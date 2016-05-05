@@ -10,10 +10,7 @@ import SystemConfiguration.CaptiveNetwork
 
 class ViewController: UIViewController {
 
-    let SSID_Metro = "MosMetro_Free"
-    let loginURL = "http://wi-fi.ru"
-    let testURL = "https://ya.ru"
-    let MMA = MosMetroAPI()
+    let MosMetro = MosMetroAPI()
 
     //Text
     @IBOutlet weak var WifiName: UILabel!
@@ -23,29 +20,39 @@ class ViewController: UIViewController {
 
     // Button
     @IBAction func GetSSID(sender: AnyObject) {
-        let NameWifi = MMA.getSSID()
-        WifiName.text = NameWifi
-        DebugLog("# wifi: " + NameWifi)
-        if (NameWifi ==  SSID_Metro) {
+        WifiName.text = MosMetro.getSSID()
+        if (MosMetro.inMetro()) {
             DebugLog("Вы в метро!")
         }
-
     }
 
     @IBAction func Connect(sender: UIButton) {
-        DebugLog("Connect to Internet")
-        setNotification("Успешное подключение к интернету", action: "Какой-то экшон", time: 10)
         DebugLog("# Начало подключения к интернету:")
-        connectInternet()
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+            let bool = self.connectInternet()
+            dispatch_async(dispatch_get_main_queue()) {
+                if (bool) {
+                    self.DebugLog("# Подключение выполнено")
+                } else {
+                    self.DebugLog("# Подключение НЕ выполнено")
+                }
+            }
+        }
     }
 
     @IBAction func Check(sender: UIButton) {
-        if (checkInternet()) {
-            InternetState.text = "Есть"
-            DebugLog("# Подключение к интрнету: Есть")
-        } else {
-            InternetState.text = "Нет"
-            DebugLog("# Подключение к интрнету: Нет")
+        DebugLog("# Проверка интернета")
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+            let result = self.MosMetro.checkInternet()
+            dispatch_async(dispatch_get_main_queue()) {
+                if (result) {
+                    self.InternetState.text = "Есть"
+                    self.DebugLog("# Подключение к интрнету: Есть")
+                } else {
+                    self.InternetState.text = "Нет"
+                    self.DebugLog("# Подключение к интрнету: Нет")
+                }
+            }
         }
     }
 
@@ -55,7 +62,7 @@ class ViewController: UIViewController {
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
             self.DebugText.text = self.DebugText.text.stringByAppendingString(text)
             if (self.DebugText.text.characters.count > 0) {
-                let range = NSMakeRange(self.DebugText.text.characters.count-1, 1);
+                let range = NSMakeRange(self.DebugText.text.characters.count - 1, 1);
                 self.DebugText.scrollRangeToVisible(range);
             }
         })
@@ -106,33 +113,30 @@ class ViewController: UIViewController {
     func connectInternet() -> Bool {
         var RedirectURL = ""
 
-        DebugLog("> Подключение к сети " + MMA.getSSID());
+        DebugLog("> Подключение к сети " + MosMetro.getSSID());
         DebugLog(">> Проверка доступа в интернет");
-        let connected = checkInternet();
+        let connected = MosMetro.checkInternet();
 
         if (connected) {
             DebugLog("<< Уже есть");
-            return true; //Раз есть то смысла нет
+            //return true; //Раз есть то смысла нет
         } else  {
             DebugLog("<< Интернета нет");
         }
 
 
         DebugLog(">>> Получение начального перенаправления");
-        if let url = NSURL(string: loginURL) {
+        if let url = NSURL(string: MosMetro.loginURL) {
             do {
             let contents = try NSString(contentsOfURL: url, usedEncoding: nil)
             if (contents != "") {
-                DebugLog(contents)
 
                 let findRedirect = matchesForRegexInText("URL=([?=&\\da-z\\.-:\\.\\/\\w \\.-]*)", text: contents as String)
-                DebugLog(findRedirect)
 
                 let rawUrlRedirect = String(findRedirect)
                 if rawUrlRedirect != "[]" {
                     let rangeURL = Range(rawUrlRedirect.startIndex.advancedBy(6)..<rawUrlRedirect.endIndex.advancedBy(-2))
                     RedirectURL = rawUrlRedirect[rangeURL]
-                    DebugLog(RedirectURL)
 
                 } else {
                     DebugLog("<<< Ошибка: перенаправление не найдено")
@@ -182,13 +186,11 @@ class ViewController: UIViewController {
 
         let paramString = "promogoto=&IDButton=Confirm&csrf.sign="+csrfSign+"&csrf.ts="+csrfTs
         request.HTTPBody = paramString.dataUsingEncoding(NSUTF8StringEncoding)
-        DebugLog(request)
+        
         let task = session.dataTaskWithRequest(request) {
-            (
-            let data, let response, let error) in
+            (let data, let response, let error) in
 
             guard let _:NSData = data, let _:NSURLResponse = response  where error == nil else {
-                self.DebugLog("<<< Ошибка: сервер не ответил или вернул ошибку");
                 return
             }
 
@@ -196,7 +198,7 @@ class ViewController: UIViewController {
             self.DebugLog(dataString!)
 
             self.DebugLog(">> Проверка доступа в интернет");
-            if (self.checkInternet()) {
+            if (self.MosMetro.checkInternet()) {
                 self.DebugLog("<< Соединение успешно установлено :3");
             } else {
                 self.DebugLog("<< Ошибка: доступ в интернет отсутствует");
@@ -205,36 +207,17 @@ class ViewController: UIViewController {
 
         task.resume()
 
-        return false;
-    }
-
-    func checkInternet() -> Bool {
-        if let url = NSURL(string: testURL) {
-            do {
-                let contents = try NSString(contentsOfURL: url, usedEncoding: nil)
-                if (contents != "") {
-                    return true
-                }
-                else {
-                    return false
-                }
-            } catch {
-                return false
-            }
-        } else {
-            return false
-        }
+        return true;
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let NameWifi = MMA.getSSID()
-        WifiName.text = NameWifi
-        if (NameWifi ==  SSID_Metro) {
-            DebugLog("> Вы в метро!")
+        WifiName.text = MosMetro.getSSID()
+        
+        if (MosMetro.inMetro()) {
             DebugLog("> Проверка интернета...")
-            if (checkInternet()) {
+            if (MosMetro.checkInternet()) {
                 InternetState.text = "Есть"
                 DebugLog("> Есть")
             } else {
@@ -243,18 +226,8 @@ class ViewController: UIViewController {
                 DebugLog("> Произвожу подключение")
                 connectInternet()
             }
-        }
-
-        //Режим проверки без WiFi
-        DebugLog("> Проверка интернета...")
-        if (checkInternet()) {
-            InternetState.text = "Есть"
-            DebugLog("> Есть")
         } else {
-            InternetState.text = "Нет"
-            DebugLog("> Нет")
-            DebugLog("> Произвожу подключение")
-            connectInternet()
+            DebugLog("Вы не в метро, или проверьте настройки wi-fi")
         }
 
     }

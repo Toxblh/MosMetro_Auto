@@ -60,9 +60,9 @@
 				B0815E5A1CCE04C600FCE894 /* AppDelegate.swift */,
 				B0815E5C1CCE04C600FCE894 /* ViewController.swift */,
 				B0815E5E1CCE04C600FCE894 /* Main.storyboard */,
-				B0815E611CCE04C600FCE894 /* Assets.xcassets */,
 				B0815E631CCE04C600FCE894 /* LaunchScreen.storyboard */,
 				B0815E661CCE04C600FCE894 /* Info.plist */,
+				B0815E611CCE04C600FCE894 /* Assets.xcassets */,
 			);
 			path = MosMetro_Auto;
 			sourceTree = "<group>";
