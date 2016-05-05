@@ -19,22 +19,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         application.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
         let backgroundTaskIdentifier = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler(
             {
-                NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "update", userInfo: nil, repeats: true)
+                NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: #selector(AppDelegate.update), userInfo: nil, repeats: true)
         })
-        NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "update", userInfo: nil, repeats: true)
+        NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: #selector(AppDelegate.update), userInfo: nil, repeats: true)
         return true
     }
     
     func application(application: UIApplication, performFetchWithCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
         print("Fetch");
-        var timer = NSTimer.scheduledTimerWithTimeInterval(5, target: self, selector: "update", userInfo: nil, repeats: true)
+        var timer = NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: #selector(AppDelegate.update), userInfo: nil, repeats: true)
     }
     
     func update() {
         let m = MosMetroAPI();
         if (m.inMetro()){
             print("В метро");
-            //setNotification("Вы в метро!", action: "Реально в метро!)", time: 0);
             if (!m.checkInternet()) {
                 if (m.connect()) {
                     setNotification("Успешное подключение к wi-fi", action: "Реально в метро!)", time: 0);
