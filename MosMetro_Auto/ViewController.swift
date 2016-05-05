@@ -12,7 +12,7 @@ class ViewController: UIViewController {
 
     let SSID_Metro = "MosMetro_Free"
     let loginURL = "http://wi-fi.ru"
-    let testURL = "http://toxblh.github.io/inet.html"
+    let testURL = "https://ya.ru"
     let MMA = MosMetroAPI()
 
     //Text
