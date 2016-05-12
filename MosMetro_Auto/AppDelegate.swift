@@ -16,7 +16,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        application.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
+        let backgroundTaskIdentifier = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler(
+            {
+                NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: #selector(AppDelegate.update), userInfo: nil, repeats: true)
+        })
+        NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: #selector(AppDelegate.update), userInfo: nil, repeats: true)
         return true
+    }
+    
+    func application(application: UIApplication, performFetchWithCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
+        print("Fetch");
+        var timer = NSTimer.scheduledTimerWithTimeInterval(10, target: self, selector: #selector(AppDelegate.update), userInfo: nil, repeats: true)
+    }
+    
+    func update() {
+        let m = MosMetroAPI();
+        if (m.inMetro()){
+            print("В метро");
+            if (!m.checkInternet()) {
+                if (m.connect()) {
+                    setNotification("Успешное подключение к wi-fi", action: "Реально в метро!)", time: 0);
+                } else {
+                    setNotification("Не смог подключиться к wi-fi", action: "Реально в метро!)", time: 0);
+                }
+            }
+        } else {
+            print("Не в метро");
+        }
     }
 
     func applicationWillResignActive(application: UIApplication) {
@@ -27,9 +54,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidEnterBackground(application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-        
-        doBack()
-        
     }
 
     func applicationWillEnterForeground(application: UIApplication) {
@@ -42,14 +66,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-    }
-    
-    func doBack() {
-        var timer = NSTimer.scheduledTimerWithTimeInterval(1, target:self, selector: Selector("updateCounter"), userInfo: nil, repeats: true)
-    }
-    
-    func inBack() {
-        setNotification("Test background", action: "background", time: 0)
     }
     
     func setNotification(body: String, action: String, time: NSTimeInterval) {
