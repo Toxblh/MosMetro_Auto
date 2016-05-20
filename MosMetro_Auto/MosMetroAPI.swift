@@ -12,6 +12,7 @@ import SystemConfiguration.CaptiveNetwork
 class MosMetroAPI {
     
     let SSID_Metro = "MosMetro_Free"
+    let SSID_Metro2 = "AURA"
     let loginURL = "http://wi-fi.ru"
     let testURL = "https://ya.ru"
     
@@ -52,7 +53,7 @@ class MosMetroAPI {
     }
     
     func inMetro() -> Bool {
-        if (getSSID() == SSID_Metro) {
+        if (getSSID() == SSID_Metro || getSSID() == SSID_Metro2) {
             return true
         } else {
             return false
