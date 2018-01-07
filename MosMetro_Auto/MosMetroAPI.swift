@@ -17,27 +17,31 @@ class MosMetroAPI {
     let testURL = "https://ya.ru"
     
     func getSSID() ->  String {
-        var currentSSID = "";
-        let interfaces:CFArray! = CNCopySupportedInterfaces()
-        for i in 0..<CFArrayGetCount(interfaces){
-            let interfaceName: UnsafePointer<Void>
-                =  CFArrayGetValueAtIndex(interfaces, i)
-            let rec = unsafeBitCast(interfaceName, AnyObject.self)
-            let unsafeInterfaceData = CNCopyCurrentNetworkInfo("\(rec)")
-            if unsafeInterfaceData != nil {
-                let interfaceData = unsafeInterfaceData! as Dictionary!
-                currentSSID = interfaceData["SSID"] as! String
-            } else {
-                currentSSID = "Not connected wi-fi"
+        var currentSSID = ""
+        if let interfaces:CFArray = CNCopySupportedInterfaces() {
+            for i in 0..<CFArrayGetCount(interfaces){
+                let interfaceName: UnsafeRawPointer = CFArrayGetValueAtIndex(interfaces, i)
+                let rec = unsafeBitCast(interfaceName, to: AnyObject.self)
+                let unsafeInterfaceData = CNCopyCurrentNetworkInfo("\(rec)" as CFString)
+                if unsafeInterfaceData != nil {
+                    let interfaceData = unsafeInterfaceData! as Dictionary!
+                    for dictData in interfaceData! {
+                        if dictData.key as! String == "SSID" {
+                            currentSSID = dictData.value as! String
+                        }
+                    }
+                } else {
+                    currentSSID = "Not connected wi-fi"
+                }
             }
         }
         return currentSSID
     }
     
     func checkInternet() -> Bool {
-        if let url = NSURL(string: testURL) {
+        if let url = URL(string: testURL) {
             do {
-                let contents = try NSString(contentsOfURL: url, usedEncoding: nil)
+                let contents = try NSString(contentsOf: url, usedEncoding: nil)
                 if (contents != "") {
                     return true
                 }
@@ -63,17 +67,17 @@ class MosMetroAPI {
     func connect() -> Bool {
         var RedirectURL = ""
         
-        if let url = NSURL(string: loginURL) {
+        if let url = URL(string: loginURL) {
             do {
-                let contents = try NSString(contentsOfURL: url, usedEncoding: nil)
+                let contents = try NSString(contentsOf: url, usedEncoding: nil)
                 if (contents != "") {
                     
                     let findRedirect = matchesForRegexInText("URL=([?=&\\da-z\\.-:\\.\\/\\w \\.-]*)", text: contents as String)
                     
-                    let rawUrlRedirect = String(findRedirect)
+                    let rawUrlRedirect = String(describing: findRedirect)
                     if rawUrlRedirect != "[]" {
-                        let rangeURL = Range(rawUrlRedirect.startIndex.advancedBy(6)..<rawUrlRedirect.endIndex.advancedBy(-2))
-                        RedirectURL = rawUrlRedirect[rangeURL]
+                        let rangeURL = Range(rawUrlRedirect.characters.index(rawUrlRedirect.startIndex, offsetBy: 6)..<rawUrlRedirect.characters.index(rawUrlRedirect.endIndex, offsetBy: -2))
+                        RedirectURL = String(rawUrlRedirect[rangeURL])
                         
                     } else {
                         return false
@@ -87,49 +91,49 @@ class MosMetroAPI {
             }
         }
         
-        let tutorialsURL = NSURL(string: RedirectURL)
-        let htmlData: NSData = NSData(contentsOfURL: tutorialsURL!)!
-        let input = NSString(data: htmlData, encoding: NSUTF8StringEncoding)
+        let tutorialsURL = URL(string: RedirectURL)
+        let htmlData: Data = try! Data(contentsOf: tutorialsURL!)
+        let input = NSString(data: htmlData, encoding: String.Encoding.utf8.rawValue)
         
-        let findCsrfSign = matchesForRegexInText("<input type=\"hidden\" name=\"csrf\\.sign\" value=\"[0-9a-z]*\"\\/>", text: input as! String)
-        let rawCsrfSign = String(findCsrfSign)
-        let rangeCsrfSign = rawCsrfSign.startIndex.advancedBy(52)..<rawCsrfSign.endIndex.advancedBy(-6)
+        let findCsrfSign = matchesForRegexInText("<input type=\"hidden\" name=\"csrf\\.sign\" value=\"[0-9a-z]*\"\\/>", text: input! as String)
+        let rawCsrfSign = String(describing: findCsrfSign)
+        let rangeCsrfSign = rawCsrfSign.characters.index(rawCsrfSign.startIndex, offsetBy: 52)..<rawCsrfSign.characters.index(rawCsrfSign.endIndex, offsetBy: -6)
         let csrfSign = rawCsrfSign[rangeCsrfSign]
-        let findCsrfTs = matchesForRegexInText("<input type=\"hidden\" name=\"csrf\\.ts\" value=\"[0-9a-z]*\"\\/>", text: input as! String)
-        let rawCsrfTs = String(findCsrfTs)
-        let rangeCsrfTs = rawCsrfTs.startIndex.advancedBy(50)..<rawCsrfTs.endIndex.advancedBy(-6)
+        let findCsrfTs = matchesForRegexInText("<input type=\"hidden\" name=\"csrf\\.ts\" value=\"[0-9a-z]*\"\\/>", text: input! as String)
+        let rawCsrfTs = String(describing: findCsrfTs)
+        let rangeCsrfTs = rawCsrfTs.characters.index(rawCsrfTs.startIndex, offsetBy: 50)..<rawCsrfTs.characters.index(rawCsrfTs.endIndex, offsetBy: -6)
         let csrfTs = rawCsrfTs[rangeCsrfTs]
         
-        let url:NSURL = NSURL(string: RedirectURL)!
-        let session = NSURLSession.sharedSession()
+        let url:URL = URL(string: RedirectURL)!
+        let session = URLSession.shared
         
-        let request = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.cachePolicy = NSURLRequestCachePolicy.ReloadIgnoringCacheData
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.cachePolicy = NSURLRequest.CachePolicy.reloadIgnoringCacheData
         
         let paramString = "promogoto=&IDButton=Confirm&csrf.sign="+csrfSign+"&csrf.ts="+csrfTs
-        request.HTTPBody = paramString.dataUsingEncoding(NSUTF8StringEncoding)
+        request.httpBody = paramString.data(using: String.Encoding.utf8)
         
-        let task = session.dataTaskWithRequest(request) {
-            (let data, let response, let error) in
+        let task = session.dataTask(with: request, completionHandler: {
+            (data, response, error) in
             
-            guard let _:NSData = data, let _:NSURLResponse = response  where error == nil else {
+            guard let _:Data = data, let _:URLResponse = response, error == nil else {
                 return
             }
-        }
+        }) 
         
         task.resume()
         
         return true;
     }
     
-    func matchesForRegexInText(regex: String!, text: String!) -> [String] {
+    func matchesForRegexInText(_ regex: String!, text: String!) -> [String] {
         do {
             let regex = try NSRegularExpression(pattern: regex, options: [])
             let nsString = text as NSString
-            let results = regex.matchesInString(text,
+            let results = regex.matches(in: text,
                                                 options: [], range: NSMakeRange(0, nsString.length))
-            return results.map { nsString.substringWithRange($0.range)}
+            return results.map { nsString.substring(with: $0.range)}
         } catch  {
             return []
         }

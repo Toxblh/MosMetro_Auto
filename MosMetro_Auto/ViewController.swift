@@ -19,48 +19,48 @@ class ViewController: UIViewController {
 
 
     // Button
-    @IBAction func GetSSID(sender: AnyObject) {
+    @IBAction func GetSSID(_ sender: AnyObject) {
         WifiName.text = MosMetro.getSSID()
         if (MosMetro.inMetro()) {
-            DebugLog("Вы в метро!")
+            DebugLog("Вы в метро!" as AnyObject)
         }
     }
 
-    @IBAction func Connect(sender: UIButton) {
-        DebugLog("# Начало подключения к интернету:")
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+    @IBAction func Connect(_ sender: UIButton) {
+        DebugLog("# Начало подключения к интернету:" as AnyObject)
+        DispatchQueue.global(priority: DispatchQueue.GlobalQueuePriority.default).async {
             let bool = self.connectInternet()
-            dispatch_async(dispatch_get_main_queue()) {
+            DispatchQueue.main.async {
                 if (bool) {
-                    self.DebugLog("# Подключение выполнено")
+                    self.DebugLog("# Подключение выполнено" as AnyObject)
                 } else {
-                    self.DebugLog("# Подключение НЕ выполнено")
+                    self.DebugLog("# Подключение НЕ выполнено" as AnyObject)
                 }
             }
         }
     }
 
-    @IBAction func Check(sender: UIButton) {
-        DebugLog("# Проверка интернета")
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+    @IBAction func Check(_ sender: UIButton) {
+        DebugLog("# Проверка интернета" as AnyObject)
+        DispatchQueue.global(priority: DispatchQueue.GlobalQueuePriority.default).async {
             let result = self.MosMetro.checkInternet()
-            dispatch_async(dispatch_get_main_queue()) {
+            DispatchQueue.main.async {
                 if (result) {
                     self.InternetState.text = "Есть"
-                    self.DebugLog("# Подключение к интрнету: Есть")
+                    self.DebugLog("# Подключение к интрнету: Есть" as AnyObject)
                 } else {
                     self.InternetState.text = "Нет"
-                    self.DebugLog("# Подключение к интрнету: Нет")
+                    self.DebugLog("# Подключение к интрнету: Нет" as AnyObject)
                 }
             }
         }
     }
 
-    func DebugLog(newLine: AnyObject) {
+    func DebugLog(_ newLine: AnyObject) {
         print(newLine)
-        let text = "\n\(String(newLine))"
-        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-            self.DebugText.text = self.DebugText.text.stringByAppendingString(text)
+        let text = "\n\(String(describing: newLine))"
+        DispatchQueue.main.async(execute: { () -> Void in
+            self.DebugText.text = self.DebugText.text + text
             if (self.DebugText.text.characters.count > 0) {
                 let range = NSMakeRange(self.DebugText.text.characters.count - 1, 1);
                 self.DebugText.scrollRangeToVisible(range);
@@ -68,42 +68,42 @@ class ViewController: UIViewController {
         })
     }
 
-    func httpRequest(url: String, completion: (html: NSString?, headers: NSObject?, code: Int?,error: String?)->()) {
-        let session = NSURLSession.sharedSession()
-        let getUrl = NSURL(string: url)
+    func httpRequest(_ url: String, completion: @escaping (_ html: NSString?, _ headers: NSObject?, _ code: Int?,_ error: String?)->()) {
+        let session = URLSession.shared
+        let getUrl = URL(string: url)
 
-        let task = session.dataTaskWithURL(getUrl!){
+        let task = session.dataTask(with: getUrl!, completionHandler: {
             (data, response, error) -> Void in
 
             if error != nil {
-                completion(html: nil, headers: nil, code: nil, error: (error!.localizedDescription) as String)
+                completion(nil, nil, nil, (error!.localizedDescription) as String)
             } else {
                 let result = NSString(data: data!, encoding:
-                    NSUTF8StringEncoding)!
+                    String.Encoding.utf8.rawValue)!
 
-                if let httpUrlResponse = response as? NSHTTPURLResponse
+                if let httpUrlResponse = response as? HTTPURLResponse
                 {
                     if error != nil {
-                        self.DebugLog("Error Occurred: \(error!.localizedDescription)")
+                        self.DebugLog("Error Occurred: \(error!.localizedDescription)" as AnyObject)
                     } else {
                         let headers = httpUrlResponse.allHeaderFields
                         let code = httpUrlResponse.statusCode
-                        completion(html: result, headers: headers, code: code, error: nil)
+                        completion(result, headers as NSObject, code, nil)
                     }
                 }
             }
-        }
+        })
 
         task.resume()
     }
 
-    func matchesForRegexInText(regex: String!, text: String!) -> [String] {
+    func matchesForRegexInText(_ regex: String!, text: String!) -> [String] {
         do {
             let regex = try NSRegularExpression(pattern: regex, options: [])
             let nsString = text as NSString
-            let results = regex.matchesInString(text,
+            let results = regex.matches(in: text,
                                                 options: [], range: NSMakeRange(0, nsString.length))
-            return results.map { nsString.substringWithRange($0.range)}
+            return results.map { nsString.substring(with: $0.range)}
         } catch let error as NSError {
             print("invalid regex: \(error.localizedDescription)")
             return []
@@ -113,97 +113,97 @@ class ViewController: UIViewController {
     func connectInternet() -> Bool {
         var RedirectURL = ""
 
-        DebugLog("> Подключение к сети " + MosMetro.getSSID());
-        DebugLog(">> Проверка доступа в интернет");
+        DebugLog("> Подключение к сети " + MosMetro.getSSID() as AnyObject);
+        DebugLog(">> Проверка доступа в интернет" as AnyObject);
         let connected = MosMetro.checkInternet();
 
         if (connected) {
-            DebugLog("<< Уже есть");
+            DebugLog("<< Уже есть" as AnyObject);
             //return true; //Раз есть то смысла нет
         } else  {
-            DebugLog("<< Интернета нет");
+            DebugLog("<< Интернета нет" as AnyObject);
         }
 
 
-        DebugLog(">>> Получение начального перенаправления");
-        if let url = NSURL(string: MosMetro.loginURL) {
+        DebugLog(">>> Получение начального перенаправления" as AnyObject);
+        if let url = URL(string: MosMetro.loginURL) {
             do {
-            let contents = try NSString(contentsOfURL: url, usedEncoding: nil)
+            let contents = try NSString(contentsOf: url, usedEncoding: nil)
             if (contents != "") {
 
                 let findRedirect = matchesForRegexInText("URL=([?=&\\da-z\\.-:\\.\\/\\w \\.-]*)", text: contents as String)
 
-                let rawUrlRedirect = String(findRedirect)
+                let rawUrlRedirect = String(describing: findRedirect)
                 if rawUrlRedirect != "[]" {
-                    let rangeURL = Range(rawUrlRedirect.startIndex.advancedBy(6)..<rawUrlRedirect.endIndex.advancedBy(-2))
-                    RedirectURL = rawUrlRedirect[rangeURL]
+                    let rangeURL = Range(rawUrlRedirect.characters.index(rawUrlRedirect.startIndex, offsetBy: 6)..<rawUrlRedirect.characters.index(rawUrlRedirect.endIndex, offsetBy: -2))
+                    RedirectURL = String(rawUrlRedirect[rangeURL])
 
                 } else {
-                    DebugLog("<<< Ошибка: перенаправление не найдено")
-                    DebugLog("<<< Нет ссылки")
+                    DebugLog("<<< Ошибка: перенаправление не найдено" as AnyObject)
+                    DebugLog("<<< Нет ссылки" as AnyObject)
                     return false
                 }
 
             } else {
-                DebugLog("<<< Ошибка: перенаправление не найдено")
-                DebugLog("<<< Нет контента")
+                DebugLog("<<< Ошибка: перенаправление не найдено" as AnyObject)
+                DebugLog("<<< Нет контента" as AnyObject)
                 return false
                 }
             } catch {
-                DebugLog("[Error:1] Эксепшон!!")
+                DebugLog("[Error:1] Эксепшон!!" as AnyObject)
                 return false
             }
         }
 
 
-        DebugLog(">>> Получение страницы авторизации");
+        DebugLog(">>> Получение страницы авторизации" as AnyObject);
 
-        let tutorialsURL = NSURL(string: RedirectURL)
-        let htmlData: NSData = NSData(contentsOfURL: tutorialsURL!)!
-        let input = NSString(data: htmlData, encoding: NSUTF8StringEncoding)
+        let tutorialsURL = URL(string: RedirectURL)
+        let htmlData: Data = try! Data(contentsOf: tutorialsURL!)
+        let input = NSString(data: htmlData, encoding: String.Encoding.utf8.rawValue)
         DebugLog(input!)
 
-        let findCsrfSign = matchesForRegexInText("<input type=\"hidden\" name=\"csrf\\.sign\" value=\"[0-9a-z]*\"\\/>", text: input as! String)
-        let rawCsrfSign = String(findCsrfSign)
-        let rangeCsrfSign = rawCsrfSign.startIndex.advancedBy(52)..<rawCsrfSign.endIndex.advancedBy(-6)
+        let findCsrfSign = matchesForRegexInText("<input type=\"hidden\" name=\"csrf\\.sign\" value=\"[0-9a-z]*\"\\/>", text: input! as String)
+        let rawCsrfSign = String(describing: findCsrfSign)
+        let rangeCsrfSign = rawCsrfSign.characters.index(rawCsrfSign.startIndex, offsetBy: 52)..<rawCsrfSign.characters.index(rawCsrfSign.endIndex, offsetBy: -6)
         let csrfSign = rawCsrfSign[rangeCsrfSign]
-        DebugLog(csrfSign)
+        DebugLog(csrfSign as AnyObject)
 
-        let findCsrfTs = matchesForRegexInText("<input type=\"hidden\" name=\"csrf\\.ts\" value=\"[0-9a-z]*\"\\/>", text: input as! String)
-        let rawCsrfTs = String(findCsrfTs)
-        let rangeCsrfTs = rawCsrfTs.startIndex.advancedBy(50)..<rawCsrfTs.endIndex.advancedBy(-6)
+        let findCsrfTs = matchesForRegexInText("<input type=\"hidden\" name=\"csrf\\.ts\" value=\"[0-9a-z]*\"\\/>", text: input! as String)
+        let rawCsrfTs = String(describing: findCsrfTs)
+        let rangeCsrfTs = rawCsrfTs.characters.index(rawCsrfTs.startIndex, offsetBy: 50)..<rawCsrfTs.characters.index(rawCsrfTs.endIndex, offsetBy: -6)
         let csrfTs = rawCsrfTs[rangeCsrfTs]
-        DebugLog(csrfTs)
+        DebugLog(csrfTs as AnyObject)
 
-        DebugLog(">>> Отправка формы авторизации");
+        DebugLog(">>> Отправка формы авторизации" as AnyObject);
 
-        let url:NSURL = NSURL(string: RedirectURL)!
-        let session = NSURLSession.sharedSession()
+        let url:URL = URL(string: RedirectURL)!
+        let session = URLSession.shared
 
-        let request = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.cachePolicy = NSURLRequestCachePolicy.ReloadIgnoringCacheData
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.cachePolicy = NSURLRequest.CachePolicy.reloadIgnoringCacheData
 
         let paramString = "promogoto=&IDButton=Confirm&csrf.sign="+csrfSign+"&csrf.ts="+csrfTs
-        request.HTTPBody = paramString.dataUsingEncoding(NSUTF8StringEncoding)
+        request.httpBody = paramString.data(using: String.Encoding.utf8)
         
-        let task = session.dataTaskWithRequest(request) {
-            (let data, let response, let error) in
+        let task = session.dataTask(with: request, completionHandler: {
+            (data, response, error) in
 
-            guard let _:NSData = data, let _:NSURLResponse = response  where error == nil else {
+            guard let _:Data = data, let _:URLResponse = response, error == nil else {
                 return
             }
 
-            let dataString = NSString(data: data!, encoding: NSUTF8StringEncoding)
+            let dataString = NSString(data: data!, encoding: String.Encoding.utf8.rawValue)
             self.DebugLog(dataString!)
 
-            self.DebugLog(">> Проверка доступа в интернет");
+            self.DebugLog(">> Проверка доступа в интернет" as AnyObject);
             if (self.MosMetro.checkInternet()) {
-                self.DebugLog("<< Соединение успешно установлено :3");
+                self.DebugLog("<< Соединение успешно установлено :3" as AnyObject);
             } else {
-                self.DebugLog("<< Ошибка: доступ в интернет отсутствует");
+                self.DebugLog("<< Ошибка: доступ в интернет отсутствует" as AnyObject);
             }
-        }
+        }) 
 
         task.resume()
 
@@ -216,18 +216,18 @@ class ViewController: UIViewController {
         WifiName.text = MosMetro.getSSID()
         
         if (MosMetro.inMetro()) {
-            DebugLog("> Проверка интернета...")
+            DebugLog("> Проверка интернета..." as AnyObject)
             if (MosMetro.checkInternet()) {
                 InternetState.text = "Есть"
-                DebugLog("> Есть")
+                DebugLog("> Есть" as AnyObject)
             } else {
                 InternetState.text = "Нет"
-                DebugLog("> Нет")
-                DebugLog("> Произвожу подключение")
+                DebugLog("> Нет" as AnyObject)
+                DebugLog("> Произвожу подключение" as AnyObject)
                 connectInternet()
             }
         } else {
-            DebugLog("Вы не в метро, или проверьте настройки wi-fi")
+            DebugLog("Вы не в метро, или проверьте настройки wi-fi" as AnyObject)
         }
 
     }
@@ -237,33 +237,33 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
-    func setNotification(body: String, action: String, time: NSTimeInterval) {
-        let notificationSettings = UIUserNotificationSettings(forTypes: [.Alert, .Badge, .Sound], categories: nil)
-        UIApplication.sharedApplication().registerUserNotificationSettings(notificationSettings)
+    func setNotification(_ body: String, action: String, time: TimeInterval) {
+        let notificationSettings = UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
+        UIApplication.shared.registerUserNotificationSettings(notificationSettings)
 
-        guard let settings = UIApplication.sharedApplication().currentUserNotificationSettings() else { return }
+        guard let settings = UIApplication.shared.currentUserNotificationSettings else { return }
 
-        if settings.types == .None {
-            let ac = UIAlertController(title: "Нет доступа", message: "Ты не дал мне доступ к уведомлениям, поэтому я не смогу тебе сообщить если, что-то сломалось", preferredStyle: .Alert)
-            ac.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
-            presentViewController(ac, animated: true, completion: nil)
+        if settings.types == UIUserNotificationType() {
+            let ac = UIAlertController(title: "Нет доступа", message: "Ты не дал мне доступ к уведомлениям, поэтому я не смогу тебе сообщить если, что-то сломалось", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            present(ac, animated: true, completion: nil)
             return
         }
 
         let notification = UILocalNotification()
-        notification.fireDate = NSDate(timeIntervalSinceNow: time)
+        notification.fireDate = Date(timeIntervalSinceNow: time)
         notification.alertBody = body
         notification.alertAction = action
         notification.soundName = UILocalNotificationDefaultSoundName
         notification.userInfo = ["CustomField1": "w00t"]
-        UIApplication.sharedApplication().scheduleLocalNotification(notification)
+        UIApplication.shared.scheduleLocalNotification(notification)
     }
 
-    func viewAlert(title: String, message: String) {
-        let alertController = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.Alert)
-        alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default,handler: nil))
+    func viewAlert(_ title: String, message: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.alert)
+        alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default,handler: nil))
 
-        self.presentViewController(alertController, animated: true, completion: nil)
+        self.present(alertController, animated: true, completion: nil)
     }
 
 }
