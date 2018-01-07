@@ -9,6 +9,6 @@
 На данный момент уже есть работа в фоне, но не более 3-10 минут.
 Пока использую так: спускаясь в метро включаю прогу и блокирую телефон, в вагоне он уже сам подключается и оповещает об этом
 
-![MosMetro_Auto](screenshots/1.PNG)
-
-![MosMetro_Auto](screenshots/2.jpg)
+<img src="screenshots/1.png" width="200">
+<img src="screenshots/2.jpg" width="200">
+<img src="screenshots/3.jpg" width="200">
