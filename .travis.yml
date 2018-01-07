@@ -3,3 +3,4 @@ osx_image: xcode9.2 #2
 xcode_project: MosMetro_Auto.xcodeproj #3
 xcode_scheme: MosMetro_Auto #4
 xcode_sdk: iphonesimulator11.2 #5
+script: xcodebuild clean build -sdk iphonesimulator11.2 -project MosMetro_Auto.xcodeproj -scheme MosMetro_Auto CODE_SIGNING_REQUIRED=NO
