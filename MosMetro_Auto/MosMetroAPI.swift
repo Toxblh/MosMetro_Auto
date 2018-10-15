@@ -24,8 +24,8 @@ class MosMetroAPI {
                 let rec = unsafeBitCast(interfaceName, to: AnyObject.self)
                 let unsafeInterfaceData = CNCopyCurrentNetworkInfo("\(rec)" as CFString)
                 if unsafeInterfaceData != nil {
-                    let interfaceData = unsafeInterfaceData! as Dictionary!
-                    for dictData in interfaceData! {
+                    let interfaceData = unsafeInterfaceData! as Dictionary
+                    for dictData in interfaceData {
                         if dictData.key as! String == "SSID" {
                             currentSSID = dictData.value as! String
                         }
@@ -76,7 +76,7 @@ class MosMetroAPI {
                     
                     let rawUrlRedirect = String(describing: findRedirect)
                     if rawUrlRedirect != "[]" {
-                        let rangeURL = Range(rawUrlRedirect.characters.index(rawUrlRedirect.startIndex, offsetBy: 6)..<rawUrlRedirect.characters.index(rawUrlRedirect.endIndex, offsetBy: -2))
+                        let rangeURL = rawUrlRedirect.index(rawUrlRedirect.startIndex, offsetBy: 6)..<rawUrlRedirect.index(rawUrlRedirect.endIndex, offsetBy: -2)
                         RedirectURL = String(rawUrlRedirect[rangeURL])
                         
                     } else {
@@ -97,11 +97,11 @@ class MosMetroAPI {
         
         let findCsrfSign = matchesForRegexInText("<input type=\"hidden\" name=\"csrf\\.sign\" value=\"[0-9a-z]*\"\\/>", text: input! as String)
         let rawCsrfSign = String(describing: findCsrfSign)
-        let rangeCsrfSign = rawCsrfSign.characters.index(rawCsrfSign.startIndex, offsetBy: 52)..<rawCsrfSign.characters.index(rawCsrfSign.endIndex, offsetBy: -6)
+        let rangeCsrfSign = rawCsrfSign.index(rawCsrfSign.startIndex, offsetBy: 52)..<rawCsrfSign.index(rawCsrfSign.endIndex, offsetBy: -6)
         let csrfSign = rawCsrfSign[rangeCsrfSign]
         let findCsrfTs = matchesForRegexInText("<input type=\"hidden\" name=\"csrf\\.ts\" value=\"[0-9a-z]*\"\\/>", text: input! as String)
         let rawCsrfTs = String(describing: findCsrfTs)
-        let rangeCsrfTs = rawCsrfTs.characters.index(rawCsrfTs.startIndex, offsetBy: 50)..<rawCsrfTs.characters.index(rawCsrfTs.endIndex, offsetBy: -6)
+        let rangeCsrfTs = rawCsrfTs.index(rawCsrfTs.startIndex, offsetBy: 50)..<rawCsrfTs.index(rawCsrfTs.endIndex, offsetBy: -6)
         let csrfTs = rawCsrfTs[rangeCsrfTs]
         
         let url:URL = URL(string: RedirectURL)!

@@ -17,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         application.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
-        let backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(
+        UIApplication.shared.beginBackgroundTask(
             expirationHandler: {
                 Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(AppDelegate.update), userInfo: nil, repeats: true)
         })
@@ -27,10 +27,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         print("Fetch");
-        var timer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(AppDelegate.update), userInfo: nil, repeats: true)
+        Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(AppDelegate.update), userInfo: nil, repeats: true)
     }
     
-    func update() {
+    @objc func update() {
         let m = MosMetroAPI();
         if (m.inMetro()){
             print("В метро");

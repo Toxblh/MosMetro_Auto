@@ -28,7 +28,7 @@ class ViewController: UIViewController {
 
     @IBAction func Connect(_ sender: UIButton) {
         DebugLog("# Начало подключения к интернету:" as AnyObject)
-        DispatchQueue.global(priority: DispatchQueue.GlobalQueuePriority.default).async {
+        DispatchQueue.global(qos: DispatchQoS.QoSClass.default).async {
             let bool = self.connectInternet()
             DispatchQueue.main.async {
                 if (bool) {
@@ -42,7 +42,7 @@ class ViewController: UIViewController {
 
     @IBAction func Check(_ sender: UIButton) {
         DebugLog("# Проверка интернета" as AnyObject)
-        DispatchQueue.global(priority: DispatchQueue.GlobalQueuePriority.default).async {
+        DispatchQueue.global(qos: DispatchQoS.QoSClass.default).async {
             let result = self.MosMetro.checkInternet()
             DispatchQueue.main.async {
                 if (result) {
@@ -61,8 +61,8 @@ class ViewController: UIViewController {
         let text = "\n\(String(describing: newLine))"
         DispatchQueue.main.async(execute: { () -> Void in
             self.DebugText.text = self.DebugText.text + text
-            if (self.DebugText.text.characters.count > 0) {
-                let range = NSMakeRange(self.DebugText.text.characters.count - 1, 1);
+            if (self.DebugText.text.count > 0) {
+                let range = NSMakeRange(self.DebugText.text.count - 1, 1);
                 self.DebugText.scrollRangeToVisible(range);
             }
         })
@@ -135,7 +135,7 @@ class ViewController: UIViewController {
 
                 let rawUrlRedirect = String(describing: findRedirect)
                 if rawUrlRedirect != "[]" {
-                    let rangeURL = Range(rawUrlRedirect.characters.index(rawUrlRedirect.startIndex, offsetBy: 6)..<rawUrlRedirect.characters.index(rawUrlRedirect.endIndex, offsetBy: -2))
+                    let rangeURL = rawUrlRedirect.index(rawUrlRedirect.startIndex, offsetBy: 6)..<rawUrlRedirect.index(rawUrlRedirect.endIndex, offsetBy: -2)
                     RedirectURL = String(rawUrlRedirect[rangeURL])
 
                 } else {
@@ -165,13 +165,13 @@ class ViewController: UIViewController {
 
         let findCsrfSign = matchesForRegexInText("<input type=\"hidden\" name=\"csrf\\.sign\" value=\"[0-9a-z]*\"\\/>", text: input! as String)
         let rawCsrfSign = String(describing: findCsrfSign)
-        let rangeCsrfSign = rawCsrfSign.characters.index(rawCsrfSign.startIndex, offsetBy: 52)..<rawCsrfSign.characters.index(rawCsrfSign.endIndex, offsetBy: -6)
+        let rangeCsrfSign = rawCsrfSign.index(rawCsrfSign.startIndex, offsetBy: 52)..<rawCsrfSign.index(rawCsrfSign.endIndex, offsetBy: -6)
         let csrfSign = rawCsrfSign[rangeCsrfSign]
         DebugLog(csrfSign as AnyObject)
 
         let findCsrfTs = matchesForRegexInText("<input type=\"hidden\" name=\"csrf\\.ts\" value=\"[0-9a-z]*\"\\/>", text: input! as String)
         let rawCsrfTs = String(describing: findCsrfTs)
-        let rangeCsrfTs = rawCsrfTs.characters.index(rawCsrfTs.startIndex, offsetBy: 50)..<rawCsrfTs.characters.index(rawCsrfTs.endIndex, offsetBy: -6)
+        let rangeCsrfTs = rawCsrfTs.index(rawCsrfTs.startIndex, offsetBy: 50)..<rawCsrfTs.index(rawCsrfTs.endIndex, offsetBy: -6)
         let csrfTs = rawCsrfTs[rangeCsrfTs]
         DebugLog(csrfTs as AnyObject)
 
@@ -224,7 +224,7 @@ class ViewController: UIViewController {
                 InternetState.text = "Нет"
                 DebugLog("> Нет" as AnyObject)
                 DebugLog("> Произвожу подключение" as AnyObject)
-                connectInternet()
+                _ = connectInternet()
             }
         } else {
             DebugLog("Вы не в метро, или проверьте настройки wi-fi" as AnyObject)
